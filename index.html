@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pencil Royal - National School Leadership Competition</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+  <link rel="icon" href="assets/img/favicon.ico">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo">Pencil Royal</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="setup.html">Setup</a>
+        <a href="competition/overview.html">Competition</a>
+        <a href="intercompitions.html">Internal Comps</a>
+        <a href="schools.html">Schools</a>
+        <a href="results.html">Results</a>
+        <a href="login.html">Login</a>
+        <a href="signup.html" class="btn primary">Register School</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Custom Hero Banner Section -->
+    <section class="hero-banner-section">
+      <div id="heroBannerContainer" class="hero-banner-wrapper">
+        <div class="hero-default">
+          <h1>Leadership. Creativity. Excellence.</h1>
+          <p>National school competition where students lead, compete and shine.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Organization Logo and Info Section -->
+    <section class="org-section">
+      <div class="container">
+        <div class="org-content-wrapper">
+          <div class="org-logo-container" id="orgLogoContainer"></div>
+          <div class="org-info-container">
+            <h2 id="orgTitle">Welcome to Our Competition</h2>
+            <p id="orgAbout" class="org-description">National school competition where students lead, compete and shine.</p>
+            <div id="missionContainer" style="display: none;">
+              <h3>Our Mission</h3>
+              <p id="orgMission" class="org-mission"></p>
+            </div>
+            <div class="org-actions">
+              <a href="signup.html" class="btn primary">Register Your School</a>
+              <a href="manage-assets.html" class="btn outline" id="manageAssetsBtn" style="display: none;">Manage Assets</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Illustrations Gallery Section -->
+    <section class="illustrations-section" id="illustrationsSection" style="display: none;">
+      <div class="container">
+        <h2>Visual Gallery</h2>
+        <div class="illustrations-grid" id="illustrationsGrid"></div>
+      </div>
+    </section>
+
+    <section class="hero">
+      <div class="container">
+        <h1>Leadership. Creativity. Excellence.</h1>
+        <p>National school competition where students lead, compete and shine.</p>
+        <div class="hero-buttons">
+          <a href="signup.html" class="btn primary">Register Your School</a>
+          <a href="competition/overview.html" class="btn outline">Learn More</a>
+        </div>
+        <p class="deadline-notice">Student registration closes: <strong>2 October 2026</strong></p>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="container">
+        <h2>Top 10 Students Nationwide</h2>
+        <div id="topStudentsContainer" class="section-content">
+          <p class="loading-text">Loading...</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="features features-alt">
+      <div class="container">
+        <h2>National Competition Finalists</h2>
+        <p class="section-description">One boy and one girl from each school competing nationally.</p>
+        <div id="finalistsContainer" class="finalists-grid">
+          <p class="loading-text">Loading...</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="container">
+        <h2>All Registered Schools</h2>
+        <p class="section-description">Click on any school to view their students and finalists competing in the nationals.</p>
+        <div id="schoolsContainer" class="schools-grid">
+          <p class="loading-text">Loading schools...</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Pencil Royal. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="competition/overview.html">Competition Rules</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script>
+    async function loadTopStudents() {
+      try {
+        const sb = await getSupabase();
+        
+        // Get top 10 students by average score from competition_scores
+        const { data: studentScores } = await sb
+          .from('competition_scores')
+          .select('student_id, score, students(id, name, gender, school_id, schools(name))')
+          .order('score', { ascending: false })
+          .limit(100);
+
+        // Group by student and calculate average
+        const studentAvgs = {};
+        if (studentScores) {
+          studentScores.forEach(record => {
+            const sId = record.student_id;
+            if (!studentAvgs[sId]) {
+              studentAvgs[sId] = { scores: [], student: record.students };
+            }
+            studentAvgs[sId].scores.push(record.score);
+          });
+        }
+
+        // Calculate averages and get top 10
+        const topStudents = Object.values(studentAvgs)
+          .map(item => ({
+            ...item.student,
+            avgScore: Math.round(item.scores.reduce((a, b) => a + b, 0) / item.scores.length)
+          }))
+          .sort((a, b) => b.avgScore - a.avgScore)
+          .slice(0, 10);
+
+        const container = document.getElementById('topStudentsContainer');
+        if (topStudents.length === 0) {
+          container.innerHTML = '<p class="loading-text">No competition scores yet</p>';
+        } else {
+          container.innerHTML = `
+            <table class="top-students-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Student Name</th>
+                  <th>School</th>
+                  <th>Gender</th>
+                  <th>Avg. Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${topStudents.map((student, idx) => `
+                  <tr>
+                    <td class="rank-cell"><span class="rank-badge">${idx + 1}</span></td>
+                    <td>${student.name}</td>
+                    <td>${student.schools?.name || 'N/A'}</td>
+                    <td>${student.gender === 'male' ? 'Boy' : 'Girl'}</td>
+                    <td class="score-cell">${student.avgScore}%</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading top students:', error);
+        document.getElementById('topStudentsContainer').innerHTML = '<p style="color: red;">Error loading data</p>';
+      }
+    }
+
+    async function loadFinalists() {
+      try {
+        const sb = await getSupabase();
+
+        // Get all finalists with their school and student info
+        const { data: finalists } = await sb
+          .from('finalists')
+          .select('students(id, name, gender), schools(id, name)')
+          .order('schools(name)');
+
+        // Group by school
+        const schoolFinalists = {};
+        if (finalists) {
+          finalists.forEach(finalist => {
+            const schoolName = finalist.schools?.name || 'Unknown School';
+            if (!schoolFinalists[schoolName]) {
+              schoolFinalists[schoolName] = { boys: [], girls: [] };
+            }
+            if (finalist.students.gender === 'male') {
+              schoolFinalists[schoolName].boys.push(finalist.students);
+            } else {
+              schoolFinalists[schoolName].girls.push(finalist.students);
+            }
+          });
+        }
+
+        const container = document.getElementById('finalistsContainer');
+        
+        if (Object.keys(schoolFinalists).length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1/-1;">No finalists selected yet</p>';
+        } else {
+          container.innerHTML = Object.entries(schoolFinalists)
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([schoolName, finalists]) => `
+              <div class="finalist-card">
+                <h3 class="finalist-school-name">${schoolName}</h3>
+                <div class="finalist-pair">
+                  <div class="finalist-slot">
+                    <div class="finalist-label">Boy Finalist</div>
+                    ${finalists.boys.length > 0
+                      ? `<div class="finalist-name">${finalists.boys[0].name}</div>`
+                      : '<div class="finalist-empty">Not selected</div>'}
+                  </div>
+                  <div class="finalist-slot">
+                    <div class="finalist-label">Girl Finalist</div>
+                    ${finalists.girls.length > 0
+                      ? `<div class="finalist-name">${finalists.girls[0].name}</div>`
+                      : '<div class="finalist-empty">Not selected</div>'}
+                  </div>
+                </div>
+              </div>
+            `).join('');
+        }
+      } catch (error) {
+        console.error('Error loading finalists:', error);
+        document.getElementById('finalistsContainer').innerHTML = '<p style="color: red; grid-column: 1/-1;">Error loading data</p>';
+      }
+    }
+
+    // Load custom assets and organization info
+    async function loadOrganizationAssets() {
+      try {
+        const sb = await getSupabase();
+
+        // Load hero banner
+        const { data: banners } = await sb
+          .from('org_assets')
+          .select('*')
+          .eq('asset_type', 'banner')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (banners && banners.length > 0) {
+          const heroBannerContainer = document.getElementById('heroBannerContainer');
+          heroBannerContainer.innerHTML = `<img src="${banners[0].public_url}" alt="Hero Banner" class="hero-banner-image">`;
+        }
+
+        // Load logo
+        const { data: logos } = await sb
+          .from('org_assets')
+          .select('*')
+          .eq('asset_type', 'logo')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (logos && logos.length > 0) {
+          const orgLogoContainer = document.getElementById('orgLogoContainer');
+          orgLogoContainer.innerHTML = `<img src="${logos[0].public_url}" alt="Organization Logo" class="org-logo">`;
+        }
+
+        // Load organization info
+        const { data: orgInfo } = await sb
+          .from('org_info')
+          .select('*')
+          .eq('id', 1)
+          .single();
+
+        if (orgInfo) {
+          if (orgInfo.about_text) {
+            document.getElementById('orgAbout').textContent = orgInfo.about_text;
+          }
+          if (orgInfo.mission_text) {
+            document.getElementById('orgMission').textContent = orgInfo.mission_text;
+            document.getElementById('missionContainer').style.display = 'block';
+          }
+        }
+
+        // Load illustrations
+        const { data: illustrations } = await sb
+          .from('org_assets')
+          .select('*')
+          .eq('asset_type', 'illustrations')
+          .order('created_at', { ascending: false });
+
+        if (illustrations && illustrations.length > 0) {
+          const illustrationsGrid = document.getElementById('illustrationsGrid');
+          const illustrationsSection = document.getElementById('illustrationsSection');
+          illustrationsSection.style.display = 'block';
+          illustrationsGrid.innerHTML = illustrations.map(img => `
+            <div class="illustration-card">
+              <img src="${img.public_url}" alt="${img.original_filename}" class="illustration-image">
+            </div>
+          `).join('');
+        }
+
+        // Show manage assets button if admin is logged in (optional)
+        // Uncomment this if you have auth setup
+        // const { data: user } = await sb.auth.getUser();
+        // if (user) {
+        //   document.getElementById('manageAssetsBtn').style.display = 'inline-block';
+        // }
+      } catch (error) {
+        console.log('Organization assets not found or error loading:', error);
+      }
+    }
+
+    // Load data when page loads
+    window.addEventListener('load', async () => {
+      await loadOrganizationAssets();
+      await loadTopStudents();
+      await loadFinalists();
+      await loadSchools();
+    });
+
+    async function loadSchools() {
+      try {
+        const sb = await getSupabase();
+
+        // Get all approved schools with student counts
+        const { data: schools } = await sb
+          .from('schools')
+          .select('id, name, location, profile_pic')
+          .eq('approved', true)
+          .order('name');
+
+        const container = document.getElementById('schoolsContainer');
+
+        if (!schools || schools.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1/-1;">No approved schools yet</p>';
+          return;
+        }
+
+        // Get student counts for each school
+        const schoolsWithCounts = await Promise.all(
+          schools.map(async (school) => {
+            const { count: studentCount } = await sb
+              .from('students')
+              .select('id', { count: 'exact' })
+              .eq('school_id', school.id);
+
+            const { data: finalists } = await sb
+              .from('finalists')
+              .select('id')
+              .eq('school_id', school.id);
+
+            return {
+              ...school,
+              studentCount: studentCount || 0,
+              finalistCount: finalists?.length || 0
+            };
+          })
+        );
+
+        container.innerHTML = schoolsWithCounts.map(school => `
+          <a href="school-detail.html?school=${school.id}" class="school-card">
+            <div class="school-card-image-wrapper">
+              ${school.profile_pic
+                ? `<img src="${school.profile_pic}" alt="${school.name}" class="school-card-image">`
+                : '<div class="school-card-no-image">No Photo</div>'}
+            </div>
+            <div class="school-card-content">
+              <h3 class="school-card-title">${school.name}</h3>
+              <p class="school-card-location">${school.location || 'Location not specified'}</p>
+              <div class="school-card-footer">
+                <div class="school-card-stat">
+                  <span class="school-card-stat-value">${school.studentCount}</span>
+                  <span class="school-card-stat-label">Students</span>
+                </div>
+                <div class="school-card-stat">
+                  <span class="school-card-stat-value" style="color: var(--primary-gold);">${school.finalistCount}</span>
+                  <span class="school-card-stat-label">Finalists</span>
+                </div>
+              </div>
+              <div class="school-card-action">
+                View Details →
+              </div>
+            </div>
+          </a>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading schools:', error);
+        document.getElementById('schoolsContainer').innerHTML = '<p style="color: red; grid-column: 1/-1;">Error loading data</p>';
+      }
+    }
+  </script>
+</body>
+</html>

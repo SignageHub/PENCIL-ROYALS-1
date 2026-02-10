@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Internal Competitions - Pencil Royal</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+  <style>
+    .competition-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .category-section {
+      margin-bottom: 40px;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(26,26,26,0.15);
+      border-top: 3px solid var(--primary-gold);
+    }
+    :root {
+      --primary-gold: #d4af37;
+      --dark-brown: #3a2f28;
+      --light-brown: #6b5344;
+    }
+    .category-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--dark-brown);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 2px solid var(--primary-gold);
+      padding-bottom: 15px;
+    }
+    .student-ranking {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .student-card {
+      background: #faf8f3;
+      padding: 15px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--primary-gold);
+      transition: all 0.3s ease;
+    }
+    .student-card:hover {
+      background: white;
+      box-shadow: 0 4px 12px rgba(26,26,26,0.15);
+      transform: translateX(4px);
+    }
+    .student-info {
+      flex: 1;
+    }
+    .student-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--dark-brown);
+    }
+    .student-school {
+      font-size: 13px;
+      color: var(--light-brown);
+      margin-top: 3px;
+    }
+    .student-score-section {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .score-input {
+      width: 80px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .btn-vote {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, var(--dark-brown) 0%, var(--light-brown) 100%);
+      color: var(--primary-gold);
+      border: 2px solid var(--dark-brown);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+    .btn-vote:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26,26,26,0.15);
+    }
+    .rank-badge {
+      background: linear-gradient(135deg, var(--dark-brown) 0%, var(--light-brown) 100%);
+      color: var(--primary-gold);
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    .finals-section {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(230, 199, 80, 0.1) 100%);
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid var(--primary-gold);
+      margin-top: 20px;
+    }
+    .finalist {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid var(--primary-gold);
+      transition: all 0.3s ease;
+    }
+    .finalist:hover {
+      box-shadow: 0 4px 12px rgba(26,26,26,0.15);
+    }
+    .finalist-name {
+      font-weight: 700;
+      color: var(--dark-brown);
+    }
+    .finalist-badge {
+      background: var(--primary-gold);
+      color: #1a1a1a;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .selection-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, var(--dark-brown) 0%, var(--light-brown) 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(26,26,26,0.15);
+      border-top: 3px solid var(--primary-gold);
+    }
+    .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      color: var(--primary-gold);
+    }
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.95;
+    }
+
+    .competition-description {
+      color: var(--light-brown);
+      margin-bottom: 30px;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .student-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="dashboard-header">
+    <div class="container">
+      <div class="logo">Pencil Royal</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="#" id="profileLink" onclick="goToProfile(); return false;">My School</a>
+        <a href="intercompitions.html" class="active">Competitions</a>
+        <button id="logoutBtn" class="btn outline">Logout</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="competition-container">
+    <h1>Rate Students for Nationals Selection</h1>
+    <p class="competition-description">Give marks to your students. The highest-scoring boy and girl will be selected for nationals with a green light.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="boysCount">0</div>
+        <div class="stat-label">Boys Registered</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="girlsCount">0</div>
+        <div class="stat-label">Girls Registered</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">1+1</div>
+        <div class="stat-label">For Nationals</div>
+      </div>
+    </div>
+
+    <!-- Boys Section -->
+    <div class="category-section">
+      <div class="category-title">Boys - Give Marks (Out of 100)</div>
+      <div class="student-ranking" id="boysList"></div>
+      <div class="finals-section" style="display: none;" id="boysFinals">
+        <h4 style="color: var(--dark-brown); margin-bottom: 10px;">Selected for Nationals</h4>
+        <div id="boysFinalist" style="color: var(--dark-brown);"></div>
+      </div>
+    </div>
+
+    <!-- Girls Section -->
+    <div class="category-section">
+      <div class="category-title">Girls - Give Marks (Out of 100)</div>
+      <div class="student-ranking" id="girlsList"></div>
+      <div class="finals-section" style="display: none;" id="girlsFinals">
+        <h4 style="color: var(--dark-brown); margin-bottom: 10px;">Selected for Nationals</h4>
+        <div id="girlsFinalist" style="color: var(--dark-brown);"></div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="selection-controls" id="actionButtons">
+      <button class="btn primary" id="saveBtn" onclick="saveFinalists()">Save Selections</button>
+      <button class="btn secondary" id="resetBtn" onclick="resetAll()">Reset All Marks</button>
+    </div>
+
+    <!-- Read-Only Mode Notice -->
+    <div id="readOnlyNotice" style="display: none; margin-top: 30px; padding: 20px; background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px; border-left: 5px solid #4caf50;">
+      <div style="color: #2e7d32; font-weight: 700; font-size: 16px; margin-bottom: 8px;">
+        📊 View Only - Admin Updates
+      </div>
+      <div style="color: #558b2f; font-size: 14px; line-height: 1.6;">
+        You're viewing selections approved by your admin. Updates from the admin panel will appear here automatically. Contact your admin to make changes.
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script>
+    // Get user ID from URL
+    let currentUserId = null;
+    
+    function getUserIdFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('user');
+    }
+    
+    // Navigate to profile with user ID
+    function goToProfile() {
+      if (currentUserId) {
+        window.location.href = `profile.html?user=${currentUserId}&tab=overview`;
+      } else {
+        window.location.href = 'profile.html';
+      }
+    }
+    
+    // Initialize page immediately
+    (async () => {
+      try {
+        await protectPage();
+        
+        // Get and store user ID from URL
+        currentUserId = getUserIdFromURL();
+        
+        // If no user ID in URL, get from current user
+        if (!currentUserId) {
+          const user = await getCurrentUser();
+          currentUserId = user?.id;
+        }
+        
+        // Update URL to include user ID
+        if (currentUserId && !getUserIdFromURL()) {
+          window.history.replaceState({}, '', `intercompitions.html?user=${currentUserId}`);
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        loadStudents();
+      } catch (err) {
+        console.error('Init error:', err);
+        showAlert('error', 'Error loading page: ' + err.message);
+      }
+    })();
+
+    let students = { boys: [], girls: [] };
+    let scores = {};
+    let schoolId = null;
+    let isReadOnly = false; // Flag to track read-only mode
+
+    function setReadOnlyMode(readOnly) {
+      isReadOnly = readOnly;
+      const notice = document.getElementById('readOnlyNotice');
+      const actionButtons = document.getElementById('actionButtons');
+      
+      if (readOnly) {
+        notice.style.display = 'block';
+        actionButtons.style.display = 'none';
+        // Disable all score inputs
+        document.querySelectorAll('.score-input').forEach(input => {
+          input.disabled = true;
+          input.style.opacity = '0.6';
+          input.style.cursor = 'not-allowed';
+        });
+      } else {
+        notice.style.display = 'none';
+        actionButtons.style.display = 'flex';
+        // Enable all score inputs
+        document.querySelectorAll('.score-input').forEach(input => {
+          input.disabled = false;
+          input.style.opacity = '1';
+          input.style.cursor = 'pointer';
+        });
+      }
+    }
+    let isReadOnly = false; // Flag to track read-only mode
+
+    async function loadStudents() {
+      try {
+        showLoader();
+        const sb = await getSupabase();
+        
+        // Get current user and their school
+        const user = await getCurrentUser();
+        if (!user) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        // Get school info and check verification status
+        const { data: school, error: schoolError } = await sb
+          .from('schools')
+          .select('id, approved')
+          .eq('user_id', user.id)
+          .maybeSingle();
+          
+        if (schoolError || !school) {
+          hideLoader();
+          showAlert('error', 'School not found for this user');
+          console.error('School lookup error:', schoolError);
+          return;
+        }
+
+        schoolId = school.id;
+        console.log('School ID:', schoolId, 'Approved:', school.approved);
+
+        // Check if school is approved - if not, set read-only mode
+        if (!school.approved) {
+          setReadOnlyMode(true);
+          console.log('School not approved - enabling read-only mode');
+        }
+        
+        // Load ALL students for this school
+        const { data, error } = await sb.from('students').select('*').eq('school_id', school.id);
+        
+        hideLoader();
+
+        if (error) {
+          console.error('Student fetch error:', error);
+          showAlert('error', 'Error loading students: ' + error.message);
+          return;
+        }
+        
+        if (!data || data.length === 0) {
+          showAlert('info', 'No students registered for your school yet');
+          document.getElementById('boysList').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No boys registered</p>';
+          document.getElementById('girlsList').innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No girls registered</p>';
+          return;
+        }
+
+        console.log('Students loaded:', data);
+        
+        // Filter by gender - handle multiple variations (boy/male, girl/female)
+        students.boys = data.filter(s => {
+          const genderLower = (s.gender || '').toLowerCase();
+          return genderLower === 'boy' || genderLower === 'male' || genderLower === 'm';
+        });
+        
+        students.girls = data.filter(s => {
+          const genderLower = (s.gender || '').toLowerCase();
+          return genderLower === 'girl' || genderLower === 'female' || genderLower === 'f';
+        });
+
+        console.log('Boys:', students.boys.length, 'Girls:', students.girls.length);
+
+        document.getElementById('boysCount').textContent = students.boys.length;
+        document.getElementById('girlsCount').textContent = students.girls.length;
+
+        // Load existing scores if any
+        const { data: scoreData } = await sb
+          .from('competition_scores')
+          .select('student_id, score')
+          .eq('school_id', school.id);
+
+        if (scoreData) {
+          scoreData.forEach(s => {
+            scores[s.student_id] = s.score;
+          });
+        }
+
+        renderStudents();
+      } catch (err) {
+        hideLoader();
+        console.error('Error loading students:', err);
+        showAlert('error', 'Failed to load students: ' + err.message);
+      }
+    }
+
+    function renderStudents() {
+      renderCategory('boys');
+      renderCategory('girls');
+      updateFinalists();
+    }
+
+    function renderCategory(gender) {
+      const listId = gender === 'boys' ? 'boysList' : 'girlsList';
+      const list = document.getElementById(listId);
+      const categoryStudents = students[gender];
+      
+      if (categoryStudents.length === 0) {
+        list.innerHTML = `<p style="color: #666; text-align: center; padding: 20px;">No ${gender} registered</p>`;
+        return;
+      }
+
+      // Sort by score (highest first)
+      const sorted = [...categoryStudents].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
+
+      list.innerHTML = sorted.map((student, index) => `
+        <div class="student-card" data-id="${student.id}">
+          <div style="display: flex; align-items: center; flex: 1;">
+            <div class="rank-badge">${index + 1}</div>
+            <div class="student-info">
+              <div class="student-name">${student.name}</div>
+              <div class="student-school">Year ${student.year_of_study || 'Unknown'}</div>
+            </div>
+          </div>
+          <div class="student-score-section">
+            <input 
+              type="number" 
+              class="score-input" 
+              min="0" 
+              max="100" 
+              placeholder="Marks"
+              value="${scores[student.id] || ''}"
+              onchange="updateScore('${student.id}', '${gender}')"
+            />
+            <span style="color: var(--light-brown); min-width: 50px; font-weight: 600;" id="scoreDisplay-${student.id}">${scores[student.id] || '-'} pts</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateScore(studentId, gender) {
+      if (isReadOnly) {
+        showAlert('info', 'Marks are locked. Contact your admin to make changes.');
+        return;
+      }
+
+      const input = event.target;
+      const score = parseInt(input.value) || 0;
+      
+      if (score < 0 || score > 100) {
+        showAlert('error', 'Marks must be between 0 and 100');
+        input.value = scores[studentId] || '';
+        return;
+      }
+
+      scores[studentId] = score;
+      const display = document.getElementById(`scoreDisplay-${studentId}`);
+      display.textContent = score + ' pts';
+      
+      renderCategory(gender);
+      updateFinalists();
+    }
+
+    function updateFinalists() {
+      // Get top boy
+      const boysSorted = [...students.boys].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
+      const girlsSorted = [...students.girls].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
+
+      // Display top boy
+      if (boysSorted.length > 0 && (scores[boysSorted[0].id] || 0) > 0) {
+        const topBoy = boysSorted[0];
+        document.getElementById('boysFinalist').innerHTML = `
+          <div class="finalist">
+            <div>
+              <div class="finalist-name">🟢 ${topBoy.name}</div>
+              <div style="font-size: 12px; color: var(--light-brown);">Score: ${scores[topBoy.id] || 0} / 100</div>
+            </div>
+            <div class="finalist-badge">✓ SELECTED</div>
+          </div>
+        `;
+        document.getElementById('boysFinals').style.display = 'block';
+      } else {
+        document.getElementById('boysFinals').style.display = 'none';
+      }
+
+      // Display top girl
+      if (girlsSorted.length > 0 && (scores[girlsSorted[0].id] || 0) > 0) {
+        const topGirl = girlsSorted[0];
+        document.getElementById('girlsFinalist').innerHTML = `
+          <div class="finalist">
+            <div>
+              <div class="finalist-name">🟢 ${topGirl.name}</div>
+              <div style="font-size: 12px; color: var(--light-brown);">Score: ${scores[topGirl.id] || 0} / 100</div>
+            </div>
+            <div class="finalist-badge">✓ SELECTED</div>
+          </div>
+        `;
+        document.getElementById('girlsFinals').style.display = 'block';
+      } else {
+        document.getElementById('girlsFinals').style.display = 'none';
+      }
+    }
+
+    async function saveFinalists() {
+      if (isReadOnly) {
+        showAlert('info', 'You cannot save in read-only mode. Contact your admin.');
+        return;
+      }
+
+      // Get top boy and girl
+      const boysSorted = [...students.boys].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
+      const girlsSorted = [...students.girls].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
+
+      const topBoy = boysSorted[0];
+      const topGirl = girlsSorted[0];
+
+      if (!topBoy || !topGirl || (scores[topBoy.id] || 0) === 0 || (scores[topGirl.id] || 0) === 0) {
+        showAlert('error', 'Please give marks to both a boy and a girl');
+        return;
+      }
+
+      showLoader();
+      try {
+        const sb = await getSupabase();
+
+        // Delete existing finalists for this school
+        await sb.from('finalists').delete().eq('school_id', schoolId);
+
+        // Insert new finalists
+        const finalistsData = [
+          { school_id: schoolId, student_id: topBoy.id },
+          { school_id: schoolId, student_id: topGirl.id }
+        ];
+
+        const { error: insertError } = await sb.from('finalists').insert(finalistsData);
+        if (insertError) throw insertError;
+
+        // Also save scores to competition_scores table
+        const scoresData = Object.entries(scores).map(([studentId, score]) => ({
+          student_id: studentId,
+          school_id: schoolId,
+          score: score
+        }));
+
+        // Delete old scores and insert new ones
+        await sb.from('competition_scores').delete().eq('school_id', schoolId);
+        if (scoresData.length > 0) {
+          const { error: scoreError } = await sb.from('competition_scores').insert(scoresData);
+          if (scoreError) throw scoreError;
+        }
+
+        hideLoader();
+        showAlert('success', `✅ Saved! ${topBoy.name} (Boy) & ${topGirl.name} (Girl) going to Nationals`);
+        
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          window.location.href = `profile.html?user=${currentUserId}&tab=overview`;
+        }, 2000);
+      } catch (err) {
+        hideLoader();
+        console.error('Error:', err);
+        showAlert('error', 'Error saving: ' + err.message);
+      }
+    }
+
+    function resetAll() {
+      if (confirm('Reset all marks? This cannot be undone.')) {
+        scores = {};
+        renderStudents();
+        showAlert('success', 'All marks reset');
+      }
+    }
+  </script>
+</body>
+</html>
