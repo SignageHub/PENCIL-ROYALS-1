@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Results & Leaderboard - Pencil Royal</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo">Pencil Royal</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="competition/overview.html">Competition</a>
+        <a href="schools.html">Schools</a>
+        <a href="results.html" class="active">Results</a>
+        <a href="login.html">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Competition Results</h1>
+    <p>View the leaderboard and final rankings.</p>
+
+    <div class="card">
+      <h2>Leaderboard</h2>
+      <table id="leaderboardTable">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>School</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script>
+    async function loadResults() {
+      const { data: results } = await supabase.from('results').select('rank, school_id(name), score').order('rank');
+      const tbody = document.querySelector('#leaderboardTable tbody');
+      tbody.innerHTML = '';
+      if (results) {
+        results.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${r.rank}</td><td>${r.school_id.name}</td><td>${r.score}</td>`;
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="3">No results yet.</td></tr>';
+      }
+    }
+    loadResults();
+  </script>
+</body>
+</html>
