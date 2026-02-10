@@ -1,0 +1,73 @@
+# QUICK SETUP COMMANDS
+
+## Copy and paste these commands into Supabase SQL Editor
+
+### Step 1: Run Permissions & RLS Script
+Go to: `supabase/PERMISSIONS_AND_RLS.sql` and run all the SQL code
+
+### Step 2: Create Admin User(s)
+
+#### For admin@pencilroyal.com:
+```sql
+INSERT INTO user_roles (user_id, role)
+SELECT id, 'admin'
+FROM auth.users
+WHERE email = 'admin@pencilroyal.com'
+ON CONFLICT (user_id) DO NOTHING;
+```
+
+#### For ss@gmail.com:
+```sql
+INSERT INTO user_roles (user_id, role)
+SELECT id, 'admin'
+FROM auth.users
+WHERE email = 'ss@gmail.com'
+ON CONFLICT (user_id) DO NOTHING;
+```
+
+#### For admin@test.com:
+```sql
+INSERT INTO user_roles (user_id, role)
+SELECT id, 'admin'
+FROM auth.users
+WHERE email = 'admin@test.com'
+ON CONFLICT (user_id) DO NOTHING;
+```
+
+#### OR Add Multiple at Once:
+```sql
+INSERT INTO user_roles (user_id, role)
+SELECT id, 'admin'
+FROM auth.users
+WHERE email IN ('admin@pencilroyal.com', 'ss@gmail.com', 'admin@test.com')
+ON CONFLICT (user_id) DO NOTHING;
+```
+
+### Step 3: Verify Admin Users Were Created
+```sql
+SELECT ur.user_id, ur.role, au.email
+FROM user_roles ur
+JOIN auth.users au ON ur.user_id = au.id
+WHERE ur.role = 'admin'
+ORDER BY au.email;
+```
+
+Should show all your admin email addresses.
+
+## Testing
+
+### Login as Admin
+1. Go to `/login.html`
+2. Login with one of your admin emails (e.g., admin@pencilroyal.com)
+3. Should redirect to `/admin-panel.html` ✓
+
+### Login as School
+1. Create a school account during signup
+2. Should redirect to `/profile.html` ✓
+3. Can add/edit/delete students ✓
+
+### Try Accessing Admin Panel as Non-Admin
+1. Login as a school account
+2. Try to go to `/admin-panel.html`
+3. Should show "Access Denied" ✓
+4. This means permissions are working!
